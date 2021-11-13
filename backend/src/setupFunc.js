@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
-import { create, all } from 'mathjs'
+import { create, all} from 'mathjs';
+import { setUpError } from './error';
 
 // create a mathjs instance
 const math = create(all)
@@ -10,9 +11,7 @@ export function checkDb (path) {
         return new Database(path,{fileMustExist:true}); 
     }
     catch(err) { 
-        console.log('No Database found'); 
-        console.log(err);
-        process.exit(0);
+        throw new setUpError("Database file not found - make sure database 'sws.sqlite3' in src");
     }
 };
 
@@ -21,19 +20,24 @@ export function addPriceVol (rows){
     // extract the historial price data
     const histPrices = {};
 
-    console.log(rows);
-    for(p_row of rows) {  
-    if (!histPrices[p_row.company_id]) {
-        histPrices[p_row.company_id] = [];
-    }
-    histPrices[p_row.company_id].push(p_row.price);
-    }
+    rows.map(row => {
+        if (!histPrices[row.company_id]) {
+            histPrices[row.company_id] = [];
+        }
+        histPrices[row.company_id].push(row.price);
+        }
+    );
 
-    // calulate nomralised price volatility using std/mean as measure
+    // calulate normalised price volatility using std/mean as measure
     const zscores = {};
     //calc normalised stds 
-    for(company_id in histPrices) {
-    zscores[company_id] = math.std(histPrices[company_id])/math.mean(histPrices[company_id]);
+    for(const company_id in histPrices) {
+        zscores[company_id] = math.std(histPrices[company_id])/math.mean(histPrices[company_id]);
     }
     return zscores;
+}
+
+// function formats SQL index query
+export function createIndex (indexName, tableName, indexOn) {
+    return `CREATE INDEX IF NOT EXISTS ${indexName} ON ${tableName} (${indexOn});`;
 }

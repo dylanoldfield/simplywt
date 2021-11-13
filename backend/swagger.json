@@ -1,0 +1,115 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "SimplyWT Challenge CRUD Server",
+    "description": "Server that powers the SimplyWT Challenge frontend"
+  },
+  
+  "contact": {
+      "name": "dylan oldfield",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+  "host": "localhost:5005",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Stock Information",
+      "description": "Retrieving all stock information"
+    }
+  ],
+  "components": {
+    "parameters":{
+      "Index":{
+        "in": "path",
+        "name": "Index",
+        "type": "integer",
+        "example": "0",
+        "description": "get the next 15 stocks from this index",
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "SortBy":{
+        "in": "path",
+        "name": "Sort By",
+        "type": "string",
+        "example": "scoreAsc, scoreDsc, volAsc, volDsc",
+        "description": "sort stocks acsending or descending by overall score or price volatility",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1
+        }
+      }
+    }
+  },
+  "paths": {
+    "/stocks/{index}": {
+      "get": {
+        "tags": ["Stock Information"],
+        "summary": "Get the next 15 stocks starting from index {index}",
+        "parameters":[
+          {
+            "$ref": "#/components/parameters/Index"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Stocks"
+            }
+          }
+        }
+      }
+    },
+    "/stocks/{index}/sorted/{sortBy}": {
+      "get": {
+        "tags": ["Stock Information"],
+        "summary": "Get the next 15 stocks starting from index {index} sorted by {sortBy}",
+        "parameters":[
+          {
+            "$ref": "#/components/parameters/Index"
+          },
+          {
+            "$ref": "#/components/parameters/SortBy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Stocks"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Stocks": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "symbol_code": {
+          "type": "string",
+          "uniqueItems": true
+        },
+        "last_px": {
+          "type": "number"
+        },
+        "score": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

@@ -3,12 +3,14 @@ import express from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
-import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerDocument from '../swagger.json';
 //first initialise the DB 
 init();
 
 // express instance
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
 // error handler function
@@ -34,7 +36,7 @@ app.get(
     '/stocks/:index',
     catchErrors(async (req, res) => {
       const { index } = req.params;
-      return res.json({ stocks: await getStocks(index) });
+      return res.json({ stocks: await getStocks(index ? index : 0) });
     }),
   );
 
@@ -42,7 +44,7 @@ app.get(
     '/stocks/:index/sorted/:sortedby',
     catchErrors(async (req, res) => {
       const { index, sortedby} = req.params;
-      return res.json({ stocks: await getStocksSorted(index , sortedby) });
+      return res.json({ stocks: await getStocksSorted(index ? index : 0 , sortedby) });
     }),
   );
 
@@ -51,43 +53,11 @@ app.get(
 */
 
 app.get('/', (req, res) => res.redirect('/docs'));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const configData = JSON.parse(fs.readFileSync('../frontend/src/config.json'));
 const port = 'BACKEND_PORT' in configData ? configData.BACKEND_PORT : 5006;
 
-const options = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "LogRocket Express API with Swagger",
-      version: "0.1.0",
-      description:
-        "This is a simple CRUD API application made with Express and documented with Swagger",
-      license: {
-        name: "MIT",
-        url: "https://spdx.org/licenses/MIT.html",
-      },
-      contact: {
-        name: "LogRocket",
-        url: "https://logrocket.com",
-        email: "info@email.com",
-      },
-    },
-    servers: [
-      {
-        url: "http://localhost:5005/docs",
-      },
-    ],
-  },
-  apis: ["./server.js"],
-};
-
-const specs = swaggerJsdoc(options);
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(specs)
-);
 
 const server = app.listen(port, () => {
   console.log(`Backend is now listening on port ${port}!`);

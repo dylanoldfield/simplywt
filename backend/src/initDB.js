@@ -1,58 +1,61 @@
-import { map } from 'mathjs';
-import { checkDb , addPriceVol } from './setupFunc.js';
+import { checkDb , addPriceVol, createIndex } from './setupFunc.js';
+import {setUpError} from './error.js';
+import indices from './indices.js'
 
 /*
     This function is used for preprocessing the database on a clean load. 
     It will check all the tables exist and create the appropriate indexes for them.
 */
 function init (){
-        // check if db exists otherwise exits
+    // check if db exists otherwise exists
     const db = checkDb('./sws.sqlite3');
-    if (!db) process.exit(0);
+    console.log("Database found");
 
-    // check if tables are correct
+    // check if tables exist
+    const tables = ['swsCompany', 'swsCompanyPriceClose', 'swsCompanyScore'];
     const tableExist = db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name= (?)");
-    const tables = ['swsCompany', 'swsCompanyPriceClose', 'swsCompanyScore']
 
-   // check if all tables exist
     tables.map(table => {
         if (!tableExist.get(table)) {
-            console.log(`Table ${table} does not exist`);
-            process.exit(0);
+            throw new setUpError(`Table ${table} does not exist`);
         }
     });
-    //check if all the tables exist
-    // tableExist.get('swsCompany') ? '' : console.log('swsCompany table does not exist') && process.exit(0);
-    // tableExist.get('swsCompanyPriceClose') ? '' : console.log('swsCompanyPriceClose table does not exist') && process.exit(0);
-    // tableExist.get('swsCompanyScore') ? '' : console.log('swsCompanyScore table does not exist') && process.exit(0);
 
-    // create cover indexes for the tables
-    // idx on id and score id to allow for faster joins, name and unique symbol as cover
-    db.prepare("CREATE INDEX IF NOT EXISTS Company_id ON swsCompany ( id ASC, name, unique_symbol)").run();
-    // idx on id for prices, date descending (quicker to get last)
-    db.prepare("CREATE INDEX IF NOT EXISTS PriceClose_id ON swsCompanyPriceClose ( company_id ASC, date DESC, price)").run();
-    // create idx on score since that is sortable field also create one of id for faster joins
-    db.prepare("CREATE INDEX IF NOT EXISTS CompanyScore_score ON swsCompanyScore (total ASC, company_id ASC)").run();
-    db.prepare("CREATE INDEX IF NOT EXISTS CompanyScore_id ON swsCompanyScore (company_id ASC, total ASC)").run();
-    console.log('Indexes prepared');
+   
+    /*
+        This segment creates a new table storing price volatility for each name. 
+        Note: used complete history since less than 90 days provided
 
-    // add zscore table if it doesn't exist
+        also add two indexes one for joins and the other for sorting on price vol
+    */
     if(!tableExist.get('swsCompanyPriceVol')){
         const prices = db.prepare('SELECT company_id, price, date FROM swsCompanyPriceClose').all();
+        if(!prices) throw new setUpError('No prices found in swsCompanyPriceClose');
+
         const zscores = addPriceVol(prices);
-        // add new table
+        if (!zscores) throw new setUpError('Error adding price volatility - zscores empty');
+
         db.prepare('CREATE TABLE swsCompanyPriceVol (company_id INTEGER UNIQUE, price_vol FLOAT)').run();
-        // populate table
-        for(company_id in zscores) {   
+
+        for(const company_id in zscores) {   
             db.prepare('INSERT INTO swsCompanyPriceVol (company_id, price_vol) VALUES (?, ?)').run(company_id, zscores[company_id]);
         }
+        console.log('Price volatility table added');
     }
-    console.log('PriceVol table prepared');
 
-    // add indices to zscore table
-    // create index on price_vol and company_id and also one on company id for joins
-    db.prepare('CREATE INDEX IF NOT EXISTS PriceVol_vol ON swsCompanyPriceVol (price_vol ASC, company_id ASC)').run();
-    db.prepare('CREATE INDEX IF NOT EXISTS PriceVol_id ON swsCompanyPriceVol (company_id ASC, price_vol ASC)').run();
+    /*
+        Create cover indices for the tables
+        - idx on id and score id/copmany_id to allow for faster joins, name and unique symbol as cover
+        - create idx on score since that is sortable field also create one of id for faster joins
+        - create idx on company id for joins with score as cover
+        - create priceVol indices for joins and sorting
+    */
+
+    for(const index in indices){
+        const {tableName, fields} = indices[index];
+        db.prepare(createIndex(index, tableName, fields)).run();
+    }
+    console.log('Indices prepared');
     console.log('Database Initialisation complete..')
 }
 
