@@ -35,7 +35,7 @@ function init (){
         const zscores = addPriceVol(prices);
         if (!zscores) throw new setUpError('Error adding price volatility - zscores empty');
 
-        db.prepare('CREATE TABLE swsCompanyPriceVol (company_id INTEGER UNIQUE, price_vol FLOAT)').run();
+        db.prepare('CREATE TABLE swsCompanyPriceVol (company_id UNIQUEIDENTIFIER PRIMARY KEY, price_vol FLOAT, FOREIGN KEY (company_id) REFERENCES swsCompany (id))').run();
 
         for(const company_id in zscores) {   
             db.prepare('INSERT INTO swsCompanyPriceVol (company_id, price_vol) VALUES (?, ?)').run(company_id, zscores[company_id]);
