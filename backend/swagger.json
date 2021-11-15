@@ -24,9 +24,9 @@
   ],
   "components": {
     "parameters":{
-      "Index":{
+      "index":{
         "in": "path",
-        "name": "Index",
+        "name": "index",
         "type": "integer",
         "example": "0",
         "description": "get the next 15 stocks from this index",
@@ -36,9 +36,9 @@
           "maximum": 1
         }
       },
-      "SortBy":{
+      "sortBy":{
         "in": "path",
-        "name": "Sort By",
+        "name": "sortBy",
         "type": "string",
         "example": "scoreAsc, scoreDsc, volAsc, volDsc",
         "description": "sort stocks acsending or descending by overall score or price volatility",
@@ -57,7 +57,7 @@
         "summary": "Get the next 15 stocks starting from index {index}",
         "parameters":[
           {
-            "$ref": "#/components/parameters/Index"
+            "$ref": "#/components/parameters/index"
           }
         ],
         "responses": {
@@ -76,10 +76,10 @@
         "summary": "Get the next 15 stocks starting from index {index} sorted by {sortBy}",
         "parameters":[
           {
-            "$ref": "#/components/parameters/Index"
+            "$ref": "#/components/parameters/index"
           },
           {
-            "$ref": "#/components/parameters/SortBy"
+            "$ref": "#/components/parameters/sortBy"
           }
         ],
         "responses": {
