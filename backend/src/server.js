@@ -40,7 +40,7 @@ app.get(
     catchErrors(async (req, res) => {
       const { index } = req.params;
       console.log(req.params);
-      return res.json({ stocks: await getStocks(index ? index : 0) });
+      return res.json({ stocks: await getStocks(index ? index : 0 , 'nothing') });
     }),
   );
 

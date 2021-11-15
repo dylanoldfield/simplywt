@@ -12,13 +12,13 @@ client.on('error', (err) => { throw new RedisError(err); });
 const queryLimit = 15;
 const orderBy = {
   'volAsc' : `V.price_vol asc`,
-  'volDesc' : `V.price_vol desc`,
+  'volDsc' : `V.price_vol desc`,
   'scoreAsc' : `T.total asc`,
-  'scoreDesc' : `T.total desc`,
+  'scoreDsc' : `T.total desc`,
   'nothing' : `C.name`
 }
 
-const getStocksQuery = (order = orderBy.nothing, limit = queryLimit, index = 0) => { return `
+const getStocksQuery = (order='nothing', limit = queryLimit, index = 0) => { return `
   Select C.name as Name, C.unique_symbol as Ticker, P.price as Price, T.total as Score, V.price_vol as 'Price Volatility' 
   from swsCompany C INNER join (
       SELECT company_id, price, max(date) 
@@ -32,7 +32,7 @@ const getStocksQuery = (order = orderBy.nothing, limit = queryLimit, index = 0) 
 
 `};
 // Get functions
-export const getStocks = async (index, order = 'nothing') => {
+export const getStocks = async (index, order='nothing') => {
     // first check redis for the data
     const db = checkDb('./sws.sqlite3');
     const query = getStocksQuery(orderBy[order], queryLimit, index);
@@ -40,22 +40,24 @@ export const getStocks = async (index, order = 'nothing') => {
     try {
       await client.connect();
       const value = await client.get(query)
-      console.log(JSON.parse(value));
+      console.log("redis ",JSON.parse(value));
       if (value) {
         client.quit();
-        return JSON.parse(value);   
+        db.close();
+        return JSON.parse(value); 
       } else {
         const stocks = await db.prepare(query).all();
         
-        // don't need to await for redis to set the cache\
-        console.log(stocks);
+        // don't need to wait for redis to set the cache
         client.set(query, JSON.stringify(stocks));
         client.quit();
+        db.close();
         return stocks;
     }
   } catch (err) {
     console.log(err);
     client.quit();
+    db.close();
     throw new AccessError(err);
     
   }
