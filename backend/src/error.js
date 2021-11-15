@@ -12,4 +12,11 @@
       this.name = 'AccessError';
     }
   }
+
+  export class RedisError extends Error {
+    constructor (message) {
+      super(message);
+      this.name = 'RedisError';
+    }
+  }
   

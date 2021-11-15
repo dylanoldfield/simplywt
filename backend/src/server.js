@@ -4,6 +4,8 @@ import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import swaggerDocument from '../swagger.json';
+import { AccessError, RedisError } from './error.js';
+import { getStocks } from './service.js'
 //first initialise the DB 
 init();
 
@@ -17,10 +19,11 @@ app.use(cors());
 const catchErrors = (fn) => async (req, res) => {
     try {
       await fn(req, res);
-      save();
     } catch (err) {
       if (err instanceof AccessError) {
         res.status(403).send({ error: err.message });
+      } else if (err instanceof RedisError){
+        res.status(500).send({ error: err.message });
       } else {
         console.log(err);
         res.status(500).send({ error: 'A system error ocurred' });
@@ -36,6 +39,7 @@ app.get(
     '/stocks/:index',
     catchErrors(async (req, res) => {
       const { index } = req.params;
+      console.log(req.params);
       return res.json({ stocks: await getStocks(index ? index : 0) });
     }),
   );
@@ -44,7 +48,8 @@ app.get(
     '/stocks/:index/sorted/:sortedby',
     catchErrors(async (req, res) => {
       const { index, sortedby} = req.params;
-      return res.json({ stocks: await getStocksSorted(index ? index : 0 , sortedby) });
+      console.log(req.params);
+      return res.json({ stocks: await getStocks(index ? index : 0 , sortedby) });
     }),
   );
 

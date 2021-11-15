@@ -55,6 +55,9 @@ function init (){
         const {tableName, fields} = indices[index];
         db.prepare(createIndex(index, tableName, fields)).run();
     }
+
+    // Lastly convert the DB to WAL mode to allow for concurrent access -> kept WAL checkpointing at default in reality would probably need performance tuning
+    db.prepare('PRAGMA journal_mode = WAL').run();
     console.log('Indices prepared');
     console.log('Database Initialisation complete..')
 }
