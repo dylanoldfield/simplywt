@@ -21,3 +21,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+/backend/src/dump.rdb
+/backend/sws.sqlit3-shm
+/backend/sws.sqlit3-wal
