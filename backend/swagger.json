@@ -8,7 +8,7 @@
   
   "contact": {
       "name": "dylan oldfield",
-      "email": "support@example.com"
+      "email": "dylan.oldfield@yahoo.com"
     },
     "license": {
       "name": "Apache 2.0",
@@ -91,6 +91,21 @@
           }
         }
       }
+    },
+    "/stocks/number": {
+      "get": {
+        "tags": ["Stock Information"],
+        "summary": "Get total number of stocks in databse",
+        "parameters":[],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/StockCount"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -108,6 +123,13 @@
         },
         "score": {
           "type": "integer"
+        }
+      }
+    },
+    "StockCount": {
+      "properties": {
+        "count": {
+          "type": "number"
         }
       }
     }

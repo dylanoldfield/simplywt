@@ -1,6 +1,7 @@
 import { checkDb , addPriceVol, createIndex } from './setupFunc.js';
 import {setUpError} from './error.js';
 import indices from './indices.js'
+import { DB_PATH } from '../config.json'
 
 /*
     This function is used for preprocessing the database on a clean load. 
@@ -8,7 +9,7 @@ import indices from './indices.js'
 */
 function init (){
     // check if db exists otherwise exists
-    const db = checkDb('./sws.sqlite3');
+    const db = checkDb(DB_PATH);
     console.log("Database found");
 
     // check if tables exist

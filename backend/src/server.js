@@ -5,7 +5,7 @@ import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import swaggerDocument from '../swagger.json';
 import { AccessError, RedisError } from './error.js';
-import { getStocks } from './service.js'
+import { getStocks, getStockNum } from './service.js'
 //first initialise the DB 
 init();
 
@@ -34,13 +34,18 @@ const catchErrors = (fn) => async (req, res) => {
 /*
   API endpoints
 */
+app.get(
+  '/stocks/number',
+  catchErrors(async (req, res) => {
+    return res.json({ number: await getStockNum()});
+  }),
+);
 
 app.get(
     '/stocks/:index',
     catchErrors(async (req, res) => {
       const { index } = req.params;
-      console.log(req.params);
-      return res.json({ stocks: await getStocks(index ? index : 0 , 'nothing') });
+      return res.json({ stocks: await getStocks({index : index ? index : 0 , order : 'nothing'}) });
     }),
   );
 
@@ -48,10 +53,10 @@ app.get(
     '/stocks/:index/sorted/:sortedby',
     catchErrors(async (req, res) => {
       const { index, sortedby} = req.params;
-      console.log(req.params);
-      return res.json({ stocks: await getStocks(index ? index : 0 , sortedby) });
+      return res.json({ stocks: await getStocks({index : index ? index : 0 , order : sortedby}) });
     }),
   );
+
 
 /*
     Running the server
