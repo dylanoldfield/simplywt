@@ -1,0 +1,7 @@
+.filterRow{
+    height : 5px;
+}
+
+.fitlerRow td{
+    height : auto !important;
+}

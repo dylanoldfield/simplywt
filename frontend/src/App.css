@@ -36,3 +36,10 @@
     transform: rotate(360deg);
   }
 }
+
+
+.StyledTable {
+  border: 1px solid #ffffff;
+  border-collapse: collapse;
+  width: 100%;
+}
