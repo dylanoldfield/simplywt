@@ -1,8 +1,11 @@
-import { render, screen } from '@testing-library/react';
+import {shallow} from 'enzyme';
 import App from './App';
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+describe('Testing basic app rendering  ', () => {
+
+  const wrapper = shallow(<App />);
+  it('should have been called twice, once for count and once for stocks', () => {
+    expect(wrapper.find('StockTable').length).toBe(1);
+  });
+
 });
