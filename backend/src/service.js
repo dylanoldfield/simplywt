@@ -2,22 +2,23 @@ import { AccessError, RedisError }from './error';
 import { checkDb } from './setupFunc';
 import {createClient} from 'redis';
 import {DB_PATH} from '../config.json';
+
+
 //redis setup
 const redisPort = process.env.REDIS_PORT || 6379;
 const client = createClient(redisPort);
-
 client.on('error', (err) => { throw new RedisError(err); });
+
 
 
 // Generic DB query function -> in reality probably would adjust caching parameters depending on calls made
 const dbQuery = async (query) => {
+
   // first check redis for the data
   const db = checkDb(DB_PATH);
-  console.log(query);
   try {
     await client.connect();
     const value = await client.get(query)
-    console.log("redis ",JSON.parse(value));
     if (value) {
         client.quit();
         db.close();
