@@ -18,7 +18,7 @@ import SortableTableHeader from './SortableTableHeader.jsx';
 
 
 // imported from material ui example
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
+export const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
     backgroundColor: theme.palette.action.hover,
   },
@@ -28,7 +28,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const StyledTableCell = withStyles((theme) => ({
+export const StyledTableCell = withStyles((theme) => ({
   head: {
     backgroundColor: theme.palette.common.black,
     color: theme.palette.common.white,
@@ -39,17 +39,17 @@ const StyledTableCell = withStyles((theme) => ({
   }
 }))(TableCell);
 
-const FilterTableRow = withStyles(() => ({
+export const FilterTableRow = withStyles(() => ({
   root: {
     height: 'auto',
   }
 }))(TableRow);
 
-const FilterTableCell = withStyles(() => ({
+export const FilterTableCell = withStyles(() => ({
   root: {
     height: "100%",
-    padding: "0px 5px",
-    fontSize: "8px"
+    padding: "0px !important",
+    fontSize: "8px",
   }
 }))(TableCell);
 
@@ -77,10 +77,10 @@ export default function StockTable() {
   // use effect to pull stocks from backend
   useEffect(() => { async function fetchData() {
     const n = await getReq('stocks/number');
-    setNumStocks(n.number[0]['count(name)']);
+    setNumStocks(n ? n.number[0]['count(name)'] : 0); 
     const stockPath = order ? `stocks/${page * rowsPerPage}/sorted/${order}${orderDirection}` : `stocks/${page * rowsPerPage}`;
     const s = await getReq(stockPath);
-    setStocks(s.stocks.splice(0,rowsPerPage));
+    setStocks(s ? s.stocks.splice(0,rowsPerPage): []);
     setLoading(false);
   }
   fetchData();

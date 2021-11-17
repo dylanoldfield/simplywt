@@ -1,5 +1,12 @@
 .tableHeader{
-    display: 'flex';
+    display: flex !important;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    padding: 0 !important;
+}
+
+.arrow{
+    margin: 0 !important;
+    height: auto;
+    padding: 0;
 }

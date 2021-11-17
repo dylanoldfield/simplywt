@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-const getReq = async (path) => {
+export const getReq = async (path) => {
   try {
 
     const response = await axios.get(`http://localhost:5005/${path}`);
