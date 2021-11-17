@@ -1,7 +1,7 @@
 # Simply WT challenge 
 
 ## Initialisation 
-- if you're adding a clean DB file please add it in the backend folder and call it 'sws.db'
+- if you're adding a clean DB file please add it in the backend folder and call it 'sws.sqlite3'
 
 ### Backend
     - Please start a redis server on port 6379
